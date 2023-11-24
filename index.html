@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>crisp-game-lib</title>
+    <meta
+      name="viewport"
+      content="width=device-width, height=device-height,
+    user-scalable=no, initial-scale=1, maximum-scale=1"
+    />
+    <script src="https://unpkg.com/sounds-some-sounds@3.0.0/build/index.js"></script>
+    <script src="https://unpkg.com/gif-capture-canvas@1.1.0/build/index.js"></script>
+    <script src="https://unpkg.com/pixi.js@5.3.0/dist/pixi.min.js"></script>
+    <script src="https://unpkg.com/pixi-filters@3.1.1/dist/pixi-filters.js"></script>
+    <script src="https://unpkg.com/crisp-game-lib@1.1.1/docs/bundle.js"></script>
+
+<script>
+title = "Cut Cut Cut";
+
+description = `
+  [Hold] CUT
+`;
+
+characters = [];
+
+options = {
+    isPlayingBgm: true,
+};
+
+/** @type {Vector[]} */
+let foods;
+let boxlength;
+let knife;
+let knifeSpd;
+let life;
+
+function update() {
+  if (!ticks) {
+    life = 10;
+    boxlength = 2 + Math.floor(Math.random()* 10 );
+    foods = [vec(100+boxlength*3, 70)];
+    knife = vec(50,30);
+    lifeText = vec(3,10);
+  }
+  let scr = difficulty*0.5;      
+  text("Lives:"+life,lifeText);
+  if (input.isPressed) {
+    knife.y += 2;
+  } else {
+    knife.y = 30;
+  }
+  color("light_black");
+  box(knife, 1,15);
+  let knifeHandle = vec(knife.x,knife.y-15/2);
+  color("black");
+  box(knifeHandle,1,5)
+  if (life == 0){
+    end();
+  }
+  remove(foods ,(p) => {
+    p.x -= scr;
+    let forward = vec(p.x+(3*boxlength/2),p.y);
+    let backward = vec(p.x-(3*boxlength/2),p.y);
+    color("black");
+    if (box(forward,boxlength*2,3).isColliding.rect.light_black){
+        play("click");
+        life -= 1;
+        return true;
+    };
+    color("red");
+    if (box(p, boxlength, 3).isColliding.rect.light_black){
+        play("select");
+        addScore(11-(boxlength-2));
+        return true;
+    }
+    color("black");
+    if (box(backward,boxlength*2,3).isColliding.rect.light_black){
+        play("click");
+        life -= 1;
+        return true;
+    };
+    if(p.x < -3*boxlength){
+        play("explosion");
+        life -= 1;
+        return true;
+    }
+  });
+  if(foods.length == 0){
+    boxlength = 2 + Math.ceil(Math.random()* 10 );
+    foods.push(vec(100+boxlength*3, 70));
+  }
+}
+
+addEventListener("load", onLoad);
+</script>
+
+  </head>
+  <body style="background: #fff"></body>
+</html>
